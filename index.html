@@ -66,14 +66,16 @@ button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px soli
 <script>
 var RLM="\u200f", inp=document.getElementById("inp"), out=document.getElementById("out"),
     md=document.getElementById("md"), msg=document.getElementById("msg"), result="";
-var LATIN=/[A-Za-z0-9][A-Za-z0-9._\-+\/:@#%&']*(?:[ \t]+[A-Za-z0-9][A-Za-z0-9._\-+\/:@#%&']*)*(?=[.,:;!?)\]»،؛؟]|[ \t]*$)/gm;
+var WORD="[A-Za-z0-9]+[+#]*(?:[._\\-+\\/:@%&'?=~]+[A-Za-z0-9]+[+#]*)*\\/?";
+var LATIN=new RegExp(WORD+"(?:[ \\t]+"+WORD+")*","g");
+var PUNCT=/[.,:;!?)\]»،؛؟"'…]/;
 function fix(t){
   t=t.replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,"");
   if(md.checked){
     t=t.replace(/^\s{0,3}#{1,6}\s*/gm,"").replace(/\*\*(.+?)\*\*/g,"$1")
        .replace(/__(.+?)__/g,"$1").replace(/`([^`\n]+)`/g,"$1").replace(/^(\s*)[-*]\s+/gm,"$1• ");
   }
-  t=t.replace(LATIN,function(m){return m+RLM});
+  t=t.replace(LATIN,function(m,off,s){var n=s.charAt(off+m.length);return(n===""||n==="\n"||PUNCT.test(n))?m+RLM:m});
   return t.split("\n").map(function(l){
     return /[\u0600-\u06FF]/.test(l)?RLM+l:l;
   }).join("\n");
